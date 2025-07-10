@@ -1,0 +1,84 @@
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoBook - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="auth-style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+<body>
+
+  <div class="auth-container">
+    <!-- Login Form -->
+    <div id="login-form-container">
+      <h1>আপনার অ্যাকাউন্টে লগইন করুন</h1>
+      <p class="subtitle">আপনার তথ্য দিয়ে প্রবেশ করুন</p>
+      
+      <div class="input-group">
+        <i class="fas fa-envelope"></i>
+        <input type="email" id="login-email" placeholder="আপনার ইমেইল" required />
+      </div>
+      <div class="input-group">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="login-password" placeholder="পাসওয়ার্ড" required />
+        <span class="toggle-password"><i class="fas fa-lock"></i></span>
+      </div>
+      
+      <div class="options">
+        <a href="#" id="forgot-password-link">পাসওয়ার্ড ভুলে গেছেন?</a>
+      </div>
+      
+      <button id="login-btn" class="auth-btn">লগইন</button>
+      
+      <div class="separator">অথবা</div>
+      
+      <button id="google-login-btn" class="social-btn">
+        <i class="fab fa-google"></i> গুগল দিয়ে লগইন করুন
+      </button>
+      
+      <p class="toggle-link">অ্যাকাউন্ট নেই? <a href="#" id="show-signup">নতুন অ্যাকাউন্ট তৈরি করুন</a></p>
+    </div>
+
+    <!-- Sign-up Form (Initially Hidden) -->
+    <div id="signup-form-container" class="hidden">
+      <h1>নতুন অ্যাকাউন্ট তৈরি করুন</h1>
+      <p class="subtitle">আপনার যাত্রা শুরু করুন</p>
+      
+      <div class="input-group">
+        <i class="fas fa-user"></i>
+        <input type="text" id="signup-name" placeholder="আপনার পুরো নাম" required />
+      </div>
+      <div class="input-group">
+        <i class="fas fa-at"></i>
+        <input type="text" id="signup-username" placeholder="একটি ইউজারনেম দিন (e.g., rifat123)" required />
+      </div>
+      <div class="input-group">
+        <i class="fas fa-envelope"></i>
+        <input type="email" id="signup-email" placeholder="আপনার ইমেইল" required />
+      </div>
+      <div class="input-group">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="signup-password" placeholder="একটি শক্তিশালী পাসওয়ার্ড দিন" required />
+        <span class="toggle-password"><i class="fas fa-lock"></i></span>
+      </div>
+      
+      <button id="signup-btn" class="auth-btn">সাইন আপ</button>
+      
+      <p class="toggle-link">ইতিমধ্যে অ্যাকাউন্ট আছে? <a href="#" id="show-login">লগইন করুন</a></p>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script src="auth.js"></script>
+  
+</body>
+</html>
+
+
+

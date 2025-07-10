@@ -1,0 +1,533 @@
+
+:root {
+  --primary-color: #10b981;
+  --bg-light: #f0fdf4;
+  --bg-dark: #1f2937;
+  --text-dark: #111827;
+  --text-light: #f9fafb;
+}
+* {
+  margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif;
+}
+body {
+  background: var(--bg-light); color: var(--text-dark); transition: background 0.3s, color 0.3s; overflow-x: hidden;
+}
+body.dark { background: var(--bg-dark); color: var(--text-light); }
+.blurred { filter: blur(4px); }
+#splash {
+  position: fixed; width: 100%; height: 100vh; background: var(--primary-color); display: flex; align-items: center; justify-content: center; flex-direction: column; z-index: 9999; color: #fff;
+}
+#splash h1 { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 1rem; }
+.auto-emoji { position: absolute; font-size: 5rem; top: 40%; right: -5rem; animation: driveLeft 0.6s ease forwards; }
+@keyframes driveLeft { from { right: -5rem; } to { right: 100%; } }
+header { background: var(--primary-color); padding: 1rem; display: flex; justify-content: space-between; align-items: center; color: #fff; }
+.menu-icon, .icons i { cursor: pointer; font-size: 1.5rem; margin: 0 0.5rem; transition: color 0.3s; }
+.menu-icon:hover, .icons i:hover { color: #0f766e; }
+.side-menu {
+  position: fixed; top: 0; left: -100%; width: 75%; height: 100%; background: #fff; box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2); padding: 1.5rem; transition: left 0.3s ease; z-index: 1000; overflow-y: auto;
+}
+.side-menu.show { left: 0; }
+.close-menu { position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; cursor: pointer; }
+.side-menu ul { list-style: none; margin-top: 3rem; }
+.side-menu li { margin: 1rem 0; font-size: 1.2rem; cursor: pointer; padding: 0.6rem; border-radius: 0.6rem; transition: background 0.2s; }
+.side-menu li:hover { background: var(--primary-color); color: white; }
+main { padding: 1rem; transition: filter 0.3s; }
+.hidden { display: none !important; }
+.cash-card {
+  background: linear-gradient(135deg, #10b981, #059669); color: #fff; padding: 1rem; border-radius: 1rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; cursor: pointer; font-weight: bold; font-size: 1.3rem; user-select: none;
+}
+.summary-box {
+  background: #fff; padding: 1rem; border-radius: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); position: relative;
+}
+.close-summary { position: absolute; top: 0.4rem; right: 0.5rem; cursor: pointer; font-size: 1.3rem; color: #444; }
+.entry-form {
+  position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; padding: 1rem 1.2rem; border-radius: 1rem 1rem 0 0; box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2); transition: bottom 0.3s ease; z-index: 1000;
+}
+.entry-form.show { bottom: 0; }
+#entryFormTitle { text-align:center; margin-bottom: 0.5rem; font-family:'Playfair Display'; font-size:1.2rem; font-weight:700; }
+.entry-form select, .entry-form input, .entry-form textarea {
+  width: 100%; padding: 0.7rem; margin: 0.4rem 0; border: 1.5px solid #ccc; border-radius: 0.6rem; text-align: center; font-size: 1rem; transition: border-color 0.3s, box-shadow 0.3s; font-family: 'Hind Siliguri', sans-serif;
+}
+.entry-form select:focus, .entry-form input:focus, .entry-form textarea:focus {
+  outline: none; border-color: var(--primary-color); box-shadow: 0 0 8px var(--primary-color);
+}
+.radio-group { display: flex; justify-content: center; gap: 1rem; margin: 0.6rem 0; }
+.radio-group label { font-weight: bold; font-size: 1.1rem; cursor: pointer; }
+.entry-form button {
+  width: 100%; padding: 0.9rem; margin: 0.6rem 0; border: none; border-radius: 0.6rem; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: background 0.3s;
+}
+.submit-btn { background: var(--primary-color); color: white; }
+.submit-btn:hover { background: #059669; }
+.cancel-btn { background: #ef4444; color: white; }
+.cancel-btn:hover { background: #dc2626; }
+.new-entry-btn, .clear-btn {
+  width: 100%; padding: 1.2rem; margin: 0.7rem 0; border: none; border-radius: 0.9rem; font-size: 1.3rem; font-weight: 700; cursor: pointer; transition: background 0.3s;
+}
+.new-entry-btn { background: var(--primary-color); color: white; }
+.new-entry-btn:hover { background: #059669; }
+.clear-btn { background: #ef4444; color: white; }
+.clear-btn:hover { background: #dc2626; }
+
+.entry-item {
+  background: #fff;
+  padding: 0.8rem 1rem;
+  margin: 0.6rem 0;
+  border-radius: 0.9rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  user-select: none;
+}
+
+.entry-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.entry-details {
+    flex-grow: 1;
+}
+
+.entry-type.income {
+    color: var(--primary-color); /* সবুজ রঙ */
+}
+.entry-type.expense {
+    color: #ef4444; /* লাল রঙ */
+}
+
+.remove-btn {
+  background-color: transparent;
+  border: none;
+  color: #aaa;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s, background-color 0.3s;
+}
+
+.remove-btn:hover {
+  color: #ef4444;
+  background-color: #fdecec;
+}
+
+/* ডার্ক মোডের জন্য স্টাইল */
+body.dark .entry-item {
+  background: #1f2937;
+  color: var(--text-light);
+}
+
+body.dark .remove-btn {
+    color: #6b7280;
+}
+
+body.dark .remove-btn:hover {
+    color: #f87171;
+    background-color: #374151;
+}
+
+body.dark .entry-type.income {
+    color: #34d399;
+}
+body.dark .entry-type.expense {
+    color: #f87171;
+}
+
+ 
+.remove:hover { color: #b91c1c; }
+.badge {
+  background: #ef4444; color: white; border-radius: 50%; font-size: 0.7rem; padding: 0.15rem 0.45rem; position: absolute; top: -6px; right: -6px;
+}
+/* Report Table Styles */
+#reportContent table {
+  width:100%; border-collapse: collapse; text-align: center; margin-top: 1rem; table-layout: fixed;
+}
+#reportContent th, #reportContent td {
+  border: 1px solid #ddd; padding: 8px; word-wrap: break-word;
+}
+#reportContent thead { background-color: var(--primary-color); color: white; }
+body.dark #reportContent th, body.dark #reportContent td { border-color: #444; }
+
+/* Dark mode fixes */
+body.dark .side-menu { background: #111827; color: var(--text-light); }
+body.dark .side-menu li:hover { background: #059669; color: #fff; }
+body.dark header { background: #059669; }
+body.dark .entry-form { background: #111827; color: var(--text-light); }
+body.dark .entry-form select,
+body.dark .entry-form input,
+body.dark .entry-form textarea { background: #1f2937; color: var(--text-light); border: 1.5px solid #059669; }
+body.dark .entry-item { background: #1f2937; color: var(--text-light); }
+body.dark .summary-box { background: #111827; color: var(--text-light); }
+body.dark .cash-card { background: linear-gradient(135deg, #059669, #065f46); color: var(--text-light); }
+
+/* New styles for better table layout */
+#reportContent {
+    overflow-x: auto; /* Adds horizontal scrollbar if needed */
+}
+
+#reportContent table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    margin-top: 1rem;
+    /* Let the table grow as needed */
+    /* table-layout: fixed; - This line can cause issues, removing it for now */
+}
+
+#reportContent th, #reportContent td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    white-space: nowrap; /* Prevents text from breaking into new lines */
+}
+
+#reportContent thead {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+body.dark #reportContent th, body.dark #reportContent td {
+    border-color: #444;
+}
+
+
+/* Styles for Report Table Layout */
+#reportContent {
+    overflow-x: auto; /* Adds horizontal scrollbar if table content overflows */
+    -webkit-overflow-scrolling: touch; /* Improves scrolling performance on iOS */
+    padding-bottom: 10px; /* Add some padding for scrollbar visibility */
+}
+
+#reportContent table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    margin-top: 1rem;
+    /* Remove table-layout: fixed; to allow columns to adjust their width */
+    /* table-layout: auto; (default, usually sufficient when fixed is removed) */
+}
+
+#reportContent th, #reportContent td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    white-space: nowrap; /* Prevents text from wrapping */
+    vertical-align: middle; /* Aligns content vertically in the middle */
+}
+
+/* Optional: Set minimum widths for specific columns for better presentation */
+#reportContent th:nth-child(1), #reportContent td:nth-child(1) { min-width: 120px; } /* তারিখ */
+#reportContent th:nth-child(2), #reportContent td:nth-child(2) { min-width: 80px; }  /* অটো */
+#reportContent th:nth-child(3), #reportContent td:nth-child(3) { min-width: 60px; }  /* ধরন */
+#reportContent th:nth-child(4), #reportContent td:nth-child(4) { min-width: 80px; }  /* টাকা */
+#reportContent th:nth-child(5), #reportContent td:nth-child(5) { min-width: 150px; } /* বর্ণনা */
+#reportContent th:nth-child(6), #reportContent td:nth-child(6) { min-width: 100px; } /* এন্ট্রি কারী */
+#reportContent th:nth-child(7), #reportContent td:nth-child(7) { min-width: 150px; } /* ইউজারনেম (ID) */
+
+
+#reportContent thead {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+body.dark #reportContent th, body.dark #reportContent td {
+    border-color: #444;
+}
+
+
+/* Styles for Report Table Layout - FINAL FIX */
+
+/* Container for horizontal scrolling */
+#reportSection #reportContent {
+    overflow-x: auto; /* Ensures horizontal scrolling */
+    -webkit-overflow-scrolling: touch; /* For smoother scrolling on iOS */
+    padding-bottom: 10px; /* Adds space for scrollbar */
+}
+
+/* Make the table itself take up only the space it needs, allowing it to grow wider than its container */
+#reportSection #reportContent table {
+    width: auto; /* Allows table to expand beyond 100% width */
+    min-width: 100%; /* Ensures table takes at least 100% width of its container */
+    border-collapse: collapse;
+    text-align: center;
+    margin-top: 1rem;
+    table-layout: auto; /* Let browser decide column widths based on content */
+    /* This overrides any previous table-layout: fixed; */
+}
+
+/* Styles for table headers and cells */
+#reportSection #reportContent th, 
+#reportSection #reportContent td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    white-space: nowrap; /* Forces text to stay on a single line */
+    vertical-align: middle;
+    /* Min-width is crucial here to ensure columns have enough space and don't shrink too much */
+    /* Adjust these values if columns are still too narrow or wide */
+    min-width: 80px; /* Default minimum width for all columns */
+}
+
+/* Specific min-widths for better layout based on content */
+#reportSection #reportContent th:nth-child(1), #reportSection #reportContent td:nth-child(1) { min-width: 120px; } /* তারিখ */
+#reportSection #reportContent th:nth-child(2), #reportSection #reportContent td:nth-child(2) { min-width: 80px; }  /* অটো */
+#reportSection #reportContent th:nth-child(3), #reportSection #reportContent td:nth-child(3) { min-width: 60px; }  /* ধরন */
+#reportSection #reportContent th:nth-child(4), #reportSection #reportContent td:nth-child(4) { min-width: 80px; }  /* টাকা */
+#reportSection #reportContent th:nth-child(5), #reportSection #reportContent td:nth-child(5) { min-width: 150px; } /* বর্ণনা */
+#reportSection #reportContent th:nth-child(6), #reportSection #reportContent td:nth-child(6) { min-width: 100px; } /* এন্ট্রি কারী */
+#reportSection #reportContent th:nth-child(7), #reportSection #reportContent td:nth-child(7) { min-width: 180px; } /* ইউজারনেম (ID) - Usernames can be long */
+
+/* Header background and text color */
+#reportSection #reportContent thead {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Dark mode specific styles for table borders */
+body.dark #reportSection #reportContent th, 
+body.dark #reportSection #reportContent td {
+    border-color: #444;
+}
+
+/* --- SweetAlert2 Customization --- */
+
+/* সাধারণ পপ-আপ স্টাইল */
+.swal2-popup {
+    background: #1c1c2e; /* auth-container এর ব্যাকগ্রাউন্ডের সাথে মিল রেখে */
+    border: 1px solid #3d52d5;
+    border-radius: 16px;
+}
+
+/* টাইটেল এবং টেক্সটের রঙ */
+.swal2-title {
+    color: #f0f0f0 !important;
+}
+
+.swal2-html-container {
+    color: #a0a0a0 !important;
+}
+
+/* বাটন স্টাইল */
+.swal2-confirm, .swal2-cancel {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}
+
+.swal2-confirm {
+    background-color: var(--primary-color) !important;
+}
+
+.swal2-confirm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(61, 82, 213, 0.4);
+}
+
+.swal2-cancel {
+    background-color: #ef4444 !important;
+}
+
+/* অ্যানিমেটেড ব্যাকগ্রাউন্ড ক্লাস */
+@keyframes gradient-animation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.swal2-popup.animated-gradient-bg {
+    background: linear-gradient(-45deg, #1f2937, #3d52d5, #10b981, #1f2937);
+    background-size: 400% 400%;
+    animation: gradient-animation 15s ease infinite;
+}
+
+/* টোস্ট নোটিফিকেশনের জন্য স্টাইল */
+.swal2-toast {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+}
+
+.swal2-toast .swal2-title {
+    font-size: 1em !important;
+}
+
+/* --- Filter Container Styles --- */
+.filter-container {
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+body.dark .filter-container {
+    background-color: #1f2937;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #374151;
+}
+
+body.dark .filter-group label {
+    color: var(--text-light);
+}
+
+.filter-group input[type="date"],
+.filter-group select {
+    width: 100%;
+    padding: 0.7rem;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 1rem;
+}
+
+body.dark .filter-group input[type="date"],
+body.dark .filter-group select {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: var(--text-light);
+}
+
+.filter-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.filter-btn:hover {
+    background-color: #059669;
+}
+
+.report-summary {
+    background-color: #e2e8f0;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+body.dark .report-summary {
+    background-color: #374151;
+}
+
+/* --- Settings Page Styles --- */
+.settings-card {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+body.dark .settings-card {
+    background-color: #1f2937;
+}
+
+.settings-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.settings-description {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+}
+
+body.dark .settings-description {
+    color: #9ca3af;
+}
+
+.auto-list {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.auto-list-item {
+    background-color: #f3f4f6;
+    padding: 0.8rem 1rem;
+    border-radius: 0.7rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+}
+
+body.dark .auto-list-item {
+    background-color: #374151;
+}
+
+.auto-list-item .delete-auto-btn {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.auto-list-item .delete-auto-btn:hover {
+    transform: scale(1.2);
+}
+
+.add-auto-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.add-auto-form input {
+    flex-grow: 1;
+    width: 100%;
+    padding: 0.8rem;
+    border: 1.5px solid #ccc;
+    border-radius: 0.6rem;
+    font-size: 1rem;
+}
+
+body.dark .add-auto-form input {
+    background: #374151;
+    color: var(--text-light);
+    border-color: #4b5563;
+}
+
+.add-btn {
+    padding: 0.8rem 1rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.6rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    white-space: nowrap;
+}
+
+.add-btn:hover {
+    background-color: #059669;
+}

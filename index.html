@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your AutoBook</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri&family=Playfair+Display&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash">
+        <h1>Your AutoBook</h1>
+        <p>Made with ❤️ by Rifat & GPT</p>
+        <div class="auto-emoji">🛺</div>
+    </div>
+
+    <!-- Side Menu -->
+    <div class="side-menu" id="sideMenu">
+        <span class="close-menu" onclick="window.app.toggleMenu()">❌</span>
+        <ul>
+            <li onclick="window.app.showDashboard()">🏠 ড্যাশবোর্ড</li>
+            <li onclick="window.app.showReport()">📄 রিপোর্ট</li>
+            <li onclick="window.app.showMessages()">📩 মেসেজ</li>
+            <li onclick="window.app.showSettings()">⚙️ সেটিংস</li>
+            <li onclick="window.app.showAbout()">ℹ️ আমাদের সম্পর্কে</li>
+            <li onclick="window.app.logoutUser()">🔑 লগআউট</li>
+        </ul>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <span class="menu-icon" onclick="window.app.toggleMenu()">☰</span>
+        <h2>Your AutoBook</h2>
+        <div class="icons">
+            <i class="fas fa-moon" id="darkModeToggle" onclick="window.app.toggleDarkMode()" title="ডার্ক/লাইট মোড"></i>
+            <i class="fas fa-envelope" onclick="window.app.showMessages()" style="position: relative;">
+                <span id="unreadCount" class="badge hidden"></span>
+            </i>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="mainContent">
+        <div class="cash-card" onclick="window.app.toggleCash()">
+            <span id="cashLabel">••••••</span>
+            <i class="fas fa-eye"></i>
+        </div>
+        <div class="summary-box" id="todaySummaryBox">
+            <span class="close-summary" onclick="window.app.hideToday()">❌</span>
+            <div id="todaySummary">লোড হচ্ছে...</div>
+        </div>
+        <button class="new-entry-btn" onclick="window.app.showEntryForm()">+ নতুন এন্ট্রি</button>
+        <div id="entries"></div>
+    </main>
+
+    <!-- Entry Form -->
+    <div class="entry-form" id="entryForm" role="dialog" aria-modal="true" aria-labelledby="entryFormTitle">
+        <h3 id="entryFormTitle" style="font-family:'Playfair Display'; font-size:1.2rem;">নতুন এন্ট্রি যোগ করুন</h3>
+                <select id="autoSelect" aria-label="অটো নির্বাচন করুন">
+            <!-- জাভাস্ক্রিপ্ট থেকে অটো তালিকা এখানে যোগ করা হবে -->
+            <option value="">গাড়ি নির্বাচন করুন</option>
+        </select>
+        <input type="date" id="dateInput" aria-label="তারিখ নির্বাচন করুন" />
+        <div class="radio-group" role="radiogroup" aria-labelledby="typeLabel">
+            <label id="typeLabel"><input type="radio" name="type" value="income" checked /> আয়</label>
+            <label><input type="radio" name="type" value="expense" /> ব্যয়</label>
+        </div>
+        <input type="number" id="amountInput" placeholder="টাকার পরিমাণ" aria-label="টাকার পরিমাণ লিখুন" />
+        <textarea id="descriptionInput" placeholder="বর্ণনা" rows="2" aria-label="বর্ণনা লিখুন"></textarea>
+        <input type="text" id="entryByInput" placeholder="এন্ট্রি কারীর নাম (খালি রাখলে আপনার নাম ব্যবহৃত হবে)" aria-label="এন্ট্রি কারীর নাম লিখুন" />
+        <button class="submit-btn" onclick="window.app.addEntry()">✅ জমা দিন</button>
+        <button class="cancel-btn" onclick="window.app.hideEntryForm()">বাতিল</button>
+    </div>
+
+    <!-- Sections (Messages, Report, etc.) -->
+    <section id="messagesSection" class="hidden" style="padding:1rem;">
+        <h2 style="font-family:'Playfair Display'; font-size:1.5rem; margin-bottom:1rem;">মেসেজ</h2>
+        <ul id="messagesList" style="list-style:none; padding-left:0;"></ul>
+        <button class="clear-btn" onclick="window.app.backToDashboard()">⬅️ ড্যাশবোর্ডে ফিরে যান</button>
+    </section>
+
+    <section id="reportSection" class="hidden" style="padding:1rem;">
+        <h2 style="font-family:'Playfair Display'; font-size:1.5rem; margin-bottom:1rem;">রিপোর্ট</h2>
+        <div class="filter-container">
+            <div class="filter-group"><label for="startDate">শুরুর তারিখ:</label><input type="date" id="startDate"></div>
+            <div class="filter-group"><label for="endDate">শেষের তারিখ:</label><input type="date" id="endDate"></div>
+            <div class="filter-group">
+                <label for="autoFilter">অটো ফিল্টার:</label>
+                <select id="autoFilter"><option value="all">সব অটো</option></select>
+                </div>
+            <button class="filter-btn" onclick="window.app.generateReportContent()">ফিল্টার করুন</button>
+        </div>
+        <div class="report-summary" id="reportSummary"></div>
+        <button class="clear-btn" onclick="window.app.downloadPDF()">PDF ডাউনলোড করুন</button>
+        <div id="reportContent" style="margin-top:1rem;"></div>
+        <button class="clear-btn" onclick="window.app.backToDashboard()">⬅️ ড্যাশবোর্ডে ফিরে যান</button>
+    </section>
+
+        <section id="settingsSection" class="hidden" style="padding:1rem;">
+        <h2 style="font-family:'Playfair Display'; font-size:1.5rem; margin-bottom:1rem;">সেটিংস</h2>
+        
+        <!-- অটো ম্যানেজমেন্ট সেকশন -->
+        <div class="settings-card">
+            <h3><i class="fas fa-car"></i> আমার গাড়ি ম্যানেজ করুন</h3>
+            <p class="settings-description">এখানে আপনার নতুন গাড়ি যোগ করুন অথবা পুরনো গাড়ি তালিকা থেকে মুছে ফেলুন।</p>
+            
+            <div id="autoList" class="auto-list">
+                <!-- জাভাস্ক্রিপ্ট থেকে গাড়ির তালিকা এখানে আসবে -->
+            </div>
+            
+            <div class="add-auto-form">
+                <input type="text" id="newAutoNameInput" placeholder="গাড়ির নাম বা নাম্বার দিন (e.g., অটো-৩)" />
+                <button id="addAutoBtn" class="add-btn" onclick="window.app.addAuto()">+ গাড়ি যোগ করুন</button>
+            </div>
+        </div>
+        
+        <button class="clear-btn" onclick="window.app.backToDashboard()">⬅️ ড্যাশবোর্ডে ফিরে যান</button>
+    </section>
+
+    <section id="aboutSection" class="hidden" style="padding:1rem;">
+        <h2 style="font-family:'Playfair Display'; font-size:1.5rem; margin-bottom:1rem;">আমাদের সম্পর্কে</h2>
+        <p>অ্যাপ ভার্সন: 1.2.0 (Filter & PDF Update)</p>
+        <button class="clear-btn" onclick="window.app.backToDashboard()">⬅️ ড্যাশবোর্ডে ফিরে যান</button>
+    </section>
+
+    <!-- Audio Elements -->
+    <audio id="submitSound" src="sounds/submit.mp3" preload="auto"></audio>
+    <audio id="deleteSound" src="sounds/delete.mp3" preload="auto"></audio>
+    <audio id="errorSound" src="sounds/error.mp3" preload="auto"></audio>
+
+    <!-- External JS Libraries (UPDATED) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Sharrrk/jsPDF-CustomFonts-support@master/dist/jspdf.customfonts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Sharrrk/jsPDF-CustomFonts-support@master/dist/default_vfs.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Your Custom Script -->
+    <script src="script.js"></script>
+</body>
+</html> 
+
