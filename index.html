@@ -23,6 +23,9 @@
         <ul>
             <li onclick="window.app.showDashboard()">🏠 ড্যাশবোর্ড</li>
             <li onclick="window.app.showReport()">📄 রিপোর্ট</li>
+           
+            <li onclick="window.app.showInstallment()">💰 কিস্তি ম্যানেজমেন্ট</li>
+           
             <li onclick="window.app.showMessages()">📩 মেসেজ</li>
             <li onclick="window.app.showSettings()">⚙️ সেটিংস</li>
             <li onclick="window.app.showAbout()">ℹ️ আমাদের সম্পর্কে</li>
@@ -98,6 +101,9 @@
         <div id="reportContent" style="margin-top:1rem;"></div>
         <button class="clear-btn" onclick="window.app.backToDashboard()">⬅️ ড্যাশবোর্ডে ফিরে যান</button>
     </section>
+    
+    
+    
 
         <section id="settingsSection" class="hidden" style="padding:1rem;">
         <h2 style="font-family:'Playfair Display'; font-size:1.5rem; margin-bottom:1rem;">সেটিংস</h2>
@@ -125,6 +131,53 @@
         <p>অ্যাপ ভার্সন: 1.2.0 (Filter & PDF Update)</p>
         <button class="clear-btn" onclick="window.app.backToDashboard()">⬅️ ড্যাশবোর্ডে ফিরে যান</button>
     </section>
+    
+        <!-- ============================================== -->
+    <!--          INSTALLMENT MANAGEMENT SECTION        -->
+    <!-- ============================================== -->
+    <section id="installmentSection" class="hidden" style="padding:1rem;">
+        <h2 style="font-family:'Playfair Display'; font-size:1.5rem; margin-bottom:1rem;">কিস্তি ম্যানেজমেন্ট</h2>
+        
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-link active" onclick="window.app.openInstallmentTab(event, 'planManagement')">প্ল্যান ম্যানেজমেন্ট</button>
+            <button class="tab-link" onclick="window.app.openInstallmentTab(event, 'payment')">কিস্তি পরিশোধ</button>
+        </div>
+        
+        <!-- Tab Content -->
+        <!-- Tab 1: Plan Management -->
+        <div id="planManagement" class="tab-content" style="display: block;">
+            <div id="installmentPlansList">
+                <!-- কিস্তির প্ল্যানগুলো এখানে লোড হবে -->
+            </div>
+            <button class="new-entry-btn" onclick="window.app.showInstallmentPlanForm()">+ নতুন কিস্তির প্ল্যান যোগ করুন</button>
+        </div>
+        
+        <!-- Tab 2: Payment -->
+        <div id="payment" class="tab-content">
+            <div id="installmentPaymentList">
+                <!-- কিস্তি পরিশোধের কার্ডগুলো এখানে লোড হবে -->
+            </div>
+        </div>
+        
+        <button class="clear-btn" style="margin-top: 1rem;" onclick="window.app.backToDashboard()">⬅️ ড্যাশবোর্ডে ফিরে যান</button>
+    </section>
+    
+    <!-- Entry Form for Installment Plan -->
+    <div class="entry-form" id="installmentPlanForm" role="dialog" aria-modal="true">
+        <h3 style="font-family:'Playfair Display'; font-size:1.2rem;">নতুন কিস্তির প্ল্যান</h3>
+        <select id="installmentAutoSelect" aria-label="গাড়ি নির্বাচন করুন">
+            <option value="">গাড়ি নির্বাচন করুন</option>
+        </select>
+        <input type="number" id="totalPriceInput" placeholder="গাড়ির মোট মূল্য" aria-label="গাড়ির মোট মূল্য" />
+        <input type="number" id="downPaymentInput" placeholder="ডাউন পেমেন্ট" aria-label="ডাউন পেমেন্ট" />
+        <input type="number" id="installmentAmountInput" placeholder="মাসিক কিস্তির পরিমাণ" aria-label="মাসিক কিস্তির পরিমাণ" />
+        <label for="firstInstallmentDateInput" style="margin-top: 0.5rem; font-size: 0.9rem;">প্রথম কিস্তির তারিখ:</label>
+        <input type="date" id="firstInstallmentDateInput" aria-label="প্রথম কিস্তির তারিখ" />
+        
+        <button class="submit-btn" onclick="window.app.saveInstallmentPlan()">✅ সেভ করুন</button>
+        <button class="cancel-btn" onclick="window.app.hideInstallmentPlanForm()">বাতিল</button>
+    </div>
 
     <!-- Audio Elements -->
     <audio id="submitSound" src="sounds/submit.mp3" preload="auto"></audio>

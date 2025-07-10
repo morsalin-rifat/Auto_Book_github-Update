@@ -18,11 +18,13 @@ const auth = firebase.auth();
     let entries = [];
     let messages = [];
     let autos = [];
+    let installmentPlans = [];
     let showCash = false;
     let darkMode = localStorage.getItem('darkMode') === 'true';
 
     // --- DOM Elements (will be initialized later) ---
-     let splash, sideMenu, mainContent, entryForm, entriesDiv, cashLabel, todaySummary, unreadCount, darkModeToggle, reportContent, messagesList, autoListDiv, reportAutoFilter;
+   let splash, sideMenu, mainContent, entryForm, entriesDiv, cashLabel, todaySummary, unreadCount, darkModeToggle, reportContent, messagesList, autoListDiv, reportAutoFilter, installmentPlanForm;
+     
     const sections = {};
 
     // --- Utility Functions ---
@@ -34,12 +36,22 @@ const auth = firebase.auth();
         }
     };
 
-    const showSection = (sectionName) => {
+       const showSection = (sectionName) => {
+        // Hide all main sections and forms
         Object.values(sections).forEach(section => section.classList.add('hidden'));
+        if (entryForm) entryForm.classList.remove('show');
+        if (installmentPlanForm) installmentPlanForm.classList.remove('show');
+        
+        // Show the selected section
         if (sections[sectionName]) {
             sections[sectionName].classList.remove('hidden');
+            // Hide main content if another section is shown
             mainContent.style.display = (sectionName === 'main') ? 'block' : 'none';
+        } else if (sectionName === 'main') {
+            mainContent.style.display = 'block';
         }
+        
+        // Close side menu and remove blur
         if (sideMenu) sideMenu.classList.remove('show');
         if (mainContent) mainContent.style.filter = 'none';
     };
@@ -90,6 +102,88 @@ const auth = firebase.auth();
                 reportAutoFilter.value = currentVal;
             }
         }
+        
+            // Installment Plan Form Dropdown
+        const installmentAutoSelect = document.getElementById('installmentAutoSelect');
+        if (installmentAutoSelect) {
+            const autosWithPlans = installmentPlans.map(p => p.autoName);
+            const availableAutos = autos.filter(a => !autosWithPlans.includes(a.name));
+            
+            installmentAutoSelect.innerHTML = '<option value="">গাড়ি নির্বাচন করুন</option>';
+            availableAutos.forEach(auto => {
+                const option = document.createElement('option');
+                option.value = auto.name;
+                option.textContent = auto.name;
+                installmentAutoSelect.appendChild(option);
+            });
+        }
+    
+    
+    };
+    
+
+         // --- Installment Management ---
+    const renderInstallmentPlans = () => {
+        const plansListDiv = document.getElementById('installmentPlansList');
+        const paymentListDiv = document.getElementById('installmentPaymentList');
+        
+        if (!plansListDiv || !paymentListDiv) return;
+        
+        plansListDiv.innerHTML = '';
+        paymentListDiv.innerHTML = '';
+        
+        if (installmentPlans.length === 0) {
+            const noPlanMsg = '<p class="settings-description" style="text-align:center; padding: 2rem 0;">কোনো কিস্তির প্ল্যান যোগ করা হয়নি।</p>';
+            plansListDiv.innerHTML = noPlanMsg;
+            paymentListDiv.innerHTML = noPlanMsg;
+            return;
+        }
+        
+        installmentPlans.forEach(plan => {
+            const totalInstallments = Math.ceil(plan.totalDue / plan.installmentAmount);
+            const paidInstallments = plan.payments ? plan.payments.length : 0;
+            const progress = (paidInstallments / totalInstallments) * 100;
+            const isCompleted = paidInstallments >= totalInstallments;
+            
+            // --- Card for Plan Management Tab ---
+            const planCard = `
+                <div class="installment-card ${isCompleted ? 'completed' : ''}">
+                    <h4>${plan.autoName}</h4>
+                    <div class="info-grid">
+                        <p>মোট মূল্য: <span>${plan.totalPrice.toLocaleString('bn-BD')} ৳</span></p>
+                        <p>ডাউন পেমেন্ট: <span>${plan.downPayment.toLocaleString('bn-BD')} ৳</span></p>
+                        <p>মাসিক কিস্তি: <span>${plan.installmentAmount.toLocaleString('bn-BD')} ৳</span></p>
+                        <p>মোট কিস্তি: <span>${totalInstallments} টি</span></p>
+                    </div>
+                    <div class="card-actions">
+                        <button class="action-btn details-btn" style="background-color: #ef4444;" onclick="window.app.deleteInstallmentPlan('${plan.id}')">প্ল্যান মুছুন</button>
+                    </div>
+                </div>
+            `;
+            plansListDiv.innerHTML += planCard;
+            
+            // --- Card for Payment Tab ---
+            const paymentCard = `
+                 <div class="installment-card ${isCompleted ? 'completed' : ''}">
+                    <h4>${plan.autoName}</h4>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar ${isCompleted ? 'completed' : ''}" style="width: ${progress}%">${Math.round(progress)}%</div>
+                    </div>
+                     <div class="info-grid">
+                        <p>পরিশোধিত: <span>${paidInstallments}/${totalInstallments} টি</span></p>
+                        <p>বাকি টাকা: <span>${(plan.totalDue - (paidInstallments * plan.installmentAmount)).toLocaleString('bn-BD')} ৳</span></p>
+                    </div>
+                    ${isCompleted 
+                        ? `<p style="color: #4ade80; text-align:center; font-weight:bold;">🎉 অভিনন্দন! সব কিস্তি পরিশোধিত।</p>` 
+                        : `<div class="card-actions">
+                               <button class="action-btn pay-btn" onclick="window.app.payInstallment('${plan.id}')" ${isCompleted ? 'disabled' : ''}>কিস্তি পরিশোধ করুন</button>
+                               <button class="action-btn details-btn" onclick="window.app.showPaymentHistory('${plan.id}')">বিস্তারিত দেখুন</button>
+                           </div>`
+                    }
+                </div>
+            `;
+            paymentListDiv.innerHTML += paymentCard;
+        });
     };
 
     const addMessage = (text) => {
@@ -388,6 +482,175 @@ const auth = firebase.auth();
                 Swal.fire({ icon: 'error', title: 'PDF তৈরিতে সমস্যা', text: 'একটি অপ্রত্যাশিত সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।' });
             }
         },
+        
+                // --- Installment Methods ---
+        showInstallment: () => {
+                showSection('installment');
+                // Ensure the first tab is active when shown
+                document.querySelector('.tab-link').click();
+            },
+            openInstallmentTab: (event, tabName) => {
+                const tabcontent = document.getElementsByClassName("tab-content");
+                for (let i = 0; i < tabcontent.length; i++) {
+                    tabcontent[i].style.display = "none";
+                }
+                const tablinks = document.getElementsByClassName("tab-link");
+                for (let i = 0; i < tablinks.length; i++) {
+                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                }
+                document.getElementById(tabName).style.display = "block";
+                event.currentTarget.className += " active";
+            },
+            showInstallmentPlanForm: () => {
+                if (installmentPlanForm) {
+                    // Clear form fields before showing
+                    document.getElementById('installmentAutoSelect').value = '';
+                    document.getElementById('totalPriceInput').value = '';
+                    document.getElementById('downPaymentInput').value = '';
+                    document.getElementById('installmentAmountInput').value = '';
+                    document.getElementById('firstInstallmentDateInput').valueAsDate = new Date();
+                    
+                    installmentPlanForm.classList.add('show');
+                    mainContent.style.filter = 'blur(4px)';
+                    document.getElementById('installmentSection').style.filter = 'blur(4px)';
+                }
+            },
+            hideInstallmentPlanForm: () => {
+                if (installmentPlanForm) {
+                    installmentPlanForm.classList.remove('show');
+                    mainContent.style.filter = 'none';
+                    document.getElementById('installmentSection').style.filter = 'none';
+                }
+            },
+            saveInstallmentPlan: async () => {
+                    if (!currentUser) return;
+                    
+                    const plan = {
+                        autoName: document.getElementById('installmentAutoSelect').value,
+                        totalPrice: parseFloat(document.getElementById('totalPriceInput').value),
+                        downPayment: parseFloat(document.getElementById('downPaymentInput').value),
+                        installmentAmount: parseFloat(document.getElementById('installmentAmountInput').value),
+                        firstInstallmentDate: document.getElementById('firstInstallmentDateInput').value,
+                    };
+                    
+                    if (!plan.autoName || isNaN(plan.totalPrice) || isNaN(plan.downPayment) || isNaN(plan.installmentAmount) || !plan.firstInstallmentDate) {
+                        return Swal.fire({ icon: 'error', title: 'ফর্ম পূরণ করুন', text: 'অনুগ্রহ করে সব তথ্য সঠিকভাবে দিন।' });
+                    }
+                    
+                    const newPlan = {
+                        ...plan,
+                        userId: currentUser.uid,
+                        totalDue: plan.totalPrice - plan.downPayment,
+                        payments: [], // Array to store payment dates
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    
+                    try {
+                        await db.collection("installmentPlans").add(newPlan);
+                        Swal.fire({ icon: 'success', title: 'সফল', text: 'নতুন কিস্তির প্ল্যান সেভ হয়েছে।' });
+                        window.app.hideInstallmentPlanForm();
+                    } catch (error) {
+                        console.error("Error saving plan:", error);
+                        Swal.fire({ icon: 'error', title: 'ব্যর্থ', text: 'প্ল্যান সেভ করতে সমস্যা হয়েছে।' });
+                    }
+                },
+                deleteInstallmentPlan: (planId) => {
+                    Swal.fire({
+                        title: 'আপনি কি নিশ্চিত?',
+                        text: "এই প্ল্যানটি মুছে ফেললে এর সাথে সম্পর্কিত সব পেমেন্ট হিস্ট্রিও মুছে যাবে!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'হ্যাঁ, মুছে ফেলুন!',
+                        cancelButtonText: 'না'
+                    }).then(async (result) => {
+                        if (result.isConfirmed) {
+                            try {
+                                await db.collection("installmentPlans").doc(planId).delete();
+                                Swal.fire('মুছে ফেলা হয়েছে!', 'প্ল্যানটি সফলভাবে মুছে ফেলা হয়েছে।', 'success');
+                            } catch (e) {
+                                Swal.fire('ব্যর্থ!', 'প্ল্যানটি মুছতে সমস্যা হয়েছে।', 'error');
+                            }
+                        }
+                    });
+                },
+                payInstallment: (planId) => {
+                    if (!currentUser) return;
+                    const plan = installmentPlans.find(p => p.id === planId);
+                    if (!plan) return;
+                    
+                    Swal.fire({
+                        title: 'কিস্তি পরিশোধ',
+                        text: `${plan.autoName}-এর জন্য ${plan.installmentAmount.toLocaleString('bn-BD')} টাকার কিস্তি পরিশোধ করতে চান? এটি আপনার মূল ব্যয়ের হিসাবেও যোগ হবে।`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'হ্যাঁ, পরিশোধ করুন',
+                        cancelButtonText: 'না'
+                    }).then(async (result) => {
+                if (result.isConfirmed) {
+               
+                                   const paymentRecord = {
+                        date: new Date().toISOString().slice(0, 10),
+                        amount: plan.installmentAmount,
+                        // paidAt: firebase.firestore.FieldValue.serverTimestamp() // সাময়িকভাবে এটি বন্ধ করা হলো
+                        paidAt: new Date().toISOString() // এর পরিবর্তে ক্লায়েন্ট সাইডের সময় ব্যবহার করা হচ্ছে
+                    };
+               
+                    try {
+                        // শুধু কিস্তির প্ল্যান ডকুমেন্টটিকেই আপডেট করা হচ্ছে
+                        await db.collection("installmentPlans").doc(planId).update({
+                            payments: firebase.firestore.FieldValue.arrayUnion(paymentRecord)
+                        });
+                        
+                        playSound('submit');
+                        // এখানে আমরা onSnapshot এর জন্য অপেক্ষা করব না। 
+                        // কারণ সফল আপডেটের পর লোকাল ডেটাও আপডেট করা দরকার।
+                        
+                        // লোকাল ডেটা ম্যানুয়ালি আপডেট করা
+                        const planIndex = installmentPlans.findIndex(p => p.id === planId);
+                        if (planIndex > -1) {
+                            if (!installmentPlans[planIndex].payments) {
+                                installmentPlans[planIndex].payments = [];
+                            }
+                            installmentPlans[planIndex].payments.push(paymentRecord);
+                        }
+                        
+                        // UI রি-রেন্ডার করা
+                        renderInstallmentPlans();
+                        
+                        Swal.fire('সফল!', 'কিস্তি সফলভাবে পরিশোধ করা হয়েছে।', 'success');
+                        
+                    } catch (error) {
+                        console.error("Payment Error:", error);
+                        Swal.fire('ব্যর্থ!', 'একটি সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error');
+                    }
+                }
+            });
+                },
+                showPaymentHistory: (planId) => {
+                    const plan = installmentPlans.find(p => p.id === planId);
+                    if (!plan || !plan.payments || plan.payments.length === 0) {
+                        return Swal.fire('ইতিহাস নেই', 'এখনো কোনো কিস্তি পরিশোধ করা হয়নি।', 'info');
+                    }
+                    
+                    const historyHtml = `<div style="text-align: left; max-height: 300px; overflow-y: auto;">
+                <ul style="list-style-type: none; padding: 0;">
+                    ${plan.payments.sort((a,b) => new Date(b.date) - new Date(a.date)).map((p, index) => `
+                        <li style="padding: 8px; border-bottom: 1px solid #eee;">
+                           <strong>${plan.payments.length - index}.</strong> পরিশোধের তারিখ: ${new Date(p.date).toLocaleDateString('bn-BD')}
+                           <br>
+                           <small>টাকার পরিমাণ: ${p.amount.toLocaleString('bn-BD')} ৳</small>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>`;
+                    
+                    Swal.fire({
+                        title: `${plan.autoName}-এর পেমেন্ট ইতিহাস`,
+                        html: historyHtml,
+                        confirmButtonText: 'ঠিক আছে'
+                    });
+                }
+        
     };
 
     // --- Firebase Listeners & Auth Management ---
@@ -408,6 +671,16 @@ const auth = firebase.auth();
                 updateCashDisplays();
                 updateTodaySummary();
             }, error => console.error("Error fetching entries:", error));
+    };
+    
+    
+        const listenForInstallmentPlans = (userId) => {
+        db.collection("installmentPlans").where("userId", "==", userId).orderBy("createdAt", "asc")
+            .onSnapshot(snapshot => {
+                installmentPlans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderInstallmentPlans();
+                renderAutos(); // Re-render autos to update dropdowns
+            }, error => console.error("Error fetching installment plans:", error));
     };
 
     const listenForMessages = (userId) => {
@@ -441,16 +714,42 @@ const auth = firebase.auth();
             sections.report = document.getElementById('reportSection');
             sections.settings = document.getElementById('settingsSection');
             sections.about = document.getElementById('aboutSection');
+                        sections.installment = document.getElementById('installmentSection');
+            installmentPlanForm = document.getElementById('installmentPlanForm');
 
-            const userDocRef = db.collection('users').doc(user.uid);
+                         const userDocRef = db.collection('users').doc(user.uid);
             userDocRef.get().then(doc => {
-                if (doc.exists) {
-                    currentUser = { uid: user.uid, email: user.email, ...doc.data() };
-                } else {
-                    const defaultUsername = user.email ? user.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '') : 'unknown_user';
-                    currentUser = { uid: user.uid, email: user.email, displayName: user.displayName || defaultUsername, username: defaultUsername };
-                    db.collection('users').doc(user.uid).set({ name: currentUser.displayName, username: currentUser.username, email: currentUser.email, createdAt: firebase.firestore.FieldValue.serverTimestamp(), initial: currentUser.displayName.charAt(0).toUpperCase() }).catch(e => console.error("Error saving new user data:", e));
-                }
+                        if (doc.exists) {
+                            const userData = doc.data();
+                            // একটি নির্দিষ্ট এবং নির্ভরযোগ্য currentUser অবজেক্ট তৈরি করা
+                            currentUser = {
+                                uid: user.uid,
+                                email: user.email,
+                                displayName: userData.name, // Firestore থেকে নাম ব্যবহার করা
+                                username: userData.username // Firestore থেকে ইউজারনেম ব্যবহার করা
+                            };
+                        } else {
+                            // নতুন ব্যবহারকারীর জন্য তথ্য তৈরি করা
+                            const defaultUsername = user.email ? user.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '') : 'unknown_user';
+                            const newName = user.displayName || defaultUsername;
+                            
+                            currentUser = {
+                                uid: user.uid,
+                                email: user.email,
+                                displayName: newName,
+                                username: defaultUsername
+                            };
+                            // নতুন ব্যবহারকারীর তথ্য Firestore এ সেভ করা
+                            db.collection('users').doc(user.uid).set({
+                                name: newName,
+                                username: defaultUsername,
+                                email: user.email,
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                                initial: newName.charAt(0).toUpperCase()
+                            }).catch(e => console.error("Error saving new user data:", e));
+                        }
+                
+                
                 document.body.style.display = 'block';
                 if (splash) splash.style.display = 'none';
                 if (darkMode) document.body.classList.add('dark');
@@ -458,6 +757,7 @@ const auth = firebase.auth();
                 listenForEntries(currentUser.uid);
                 listenForMessages(currentUser.uid);
                 listenForAutos(currentUser.uid);
+                listenForInstallmentPlans(currentUser.uid);
             }).catch(error => {
                 console.error("Error fetching user data from Firestore:", error);
                 document.body.style.display = 'block';
