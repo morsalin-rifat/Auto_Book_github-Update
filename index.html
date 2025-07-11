@@ -28,6 +28,7 @@
            
             <li onclick="window.app.showMessages()">📩 মেসেজ</li>
             
+           <li onclick="window.app.showGpsPage()">📍 GPS ট্র্যাকিং</li>
              
             <li onclick="window.app.showSettings()">⚙️ সেটিংস</li>
             <li onclick="window.app.showAbout()">ℹ️ আমাদের সম্পর্কে</li>
@@ -88,6 +89,10 @@
     </div>
 
     <!-- Sections (Messages, Report, etc.) -->
+    
+    
+
+
     <section id="messagesSection" class="hidden" style="padding:1rem;">
         <h2 style="font-family:'Playfair Display'; font-size:1.5rem; margin-bottom:1rem;">মেসেজ</h2>
         <ul id="messagesList" style="list-style:none; padding-left:0;"></ul>
@@ -135,15 +140,50 @@
         <button class="clear-btn" onclick="window.app.backToDashboard()">⬅️ ড্যাশবোর্ডে ফিরে যান</button>
     </section>
 
-    <section id="aboutSection" class="hidden" style="padding:1rem;">
+    <section   id="aboutSection" class="hidden" style="padding:1rem;">
         <h2 style="font-family:'Playfair Display'; font-size:1.5rem; margin-bottom:1rem;">আমাদের সম্পর্কে</h2>
-        <p>অ্যাপ ভার্সন: 1.2.0 (Filter & PDF Update)</p>
+        <p>অ্যাপ ভার্সন:2.0 <br>(উন্নত সিকিউরিটি সিস্টেম,ফিল্টারিং সিস্টেম, Gps(Coming Soon),Installment Hisab Update) </p>
+        <p style="color:green;types:strong;">-Developed By Rifat</p>
+        
+        
         <button class="clear-btn" onclick="window.app.backToDashboard()">⬅️ ড্যাশবোর্ডে ফিরে যান</button>
     </section>
     
-        <!-- ============================================== -->
-    <!--          INSTALLMENT MANAGEMENT SECTION        -->
+     <!-- ============================================== -->
+    <!--      GPS LIVE SIGNAL ANIMATION SECTION         -->
     <!-- ============================================== -->
+    <section id="gpsSection" class="hidden gps-live-signal-page">
+        <div class="city-skyline"></div>
+        <div class="road"></div>
+        
+        <div class="animation-container">
+            <img src="images/tower-illustration.png" alt="Communication Tower" class="tower-img">
+            <img src="images/car-illustration.png" alt="Connected Car" class="car-img">
+         
+            
+            <div class="signal-wave">
+                
+                   
+                   <img class="rifat-img" src="satellite.gif" alt="" />
+                
+ 
+             <!--   <span></span>
+                <span></span>
+                <span></span>
+                -->
+               
+            
+
+            </div>
+        </div>
+        
+        <div class="gps-message-container">
+            <h3>আপনার গাড়ি এখন সংযুক্ত</h3>
+            <p>লাইভ ট্র্যাকিং এবং পূর্ণাঙ্গ নিরাপত্তা ফিচার শীঘ্রই আসছে।</p>
+            <button class="clear-btn" style="margin-top: 1rem; background-color: #3b82f6;" onclick="window.app.backToDashboard()">⬅️ ড্যাশবোর্ডে ফিরে যান</button>
+        </div>
+    </section>
+    <!-- ======================================= -->
     <section id="installmentSection" class="hidden" style="padding:1rem;">
         <h2 style="font-family:'Playfair Display'; font-size:1.5rem; margin-bottom:1rem;">কিস্তি ম্যানেজমেন্ট</h2>
         
@@ -171,6 +211,31 @@
         
         <button class="clear-btn" style="margin-top: 1rem;" onclick="window.app.backToDashboard()">⬅️ ড্যাশবোর্ডে ফিরে যান</button>
     </section>
+    
+        <!-- ============================================== -->
+    <!--            GPS COMING SOON SECTION    
+    
+        <!-- ============================================== -->
+    <!--      GPS CONNECTED WORLD ANIMATION SECTION     -->
+    <!-- ============================================== -->
+    <section id="gpsSection" class="hidden gps-animation-page">
+        <div class="animation-wrapper">
+            <!-- Background World Map -->
+            <svg class="world-map" viewBox="0 0 1000 500">
+                <!-- এই SVG পাথটি একটি সরলীকৃত বিশ্ব মানচিত্র -->
+                <path d="M844 326c-19-16-16-52 4-61 15-7 29 11 29 28 0 22-13 36-33 33zM921 349c-16-14-14-44 3-52 14-6 26 9 26 24 0 19-11 31-29 28zM958 322c-15-13-13-39 4-46 12-5 22 8 22 21 0 17-9 27-26 25zM157 181c-22-1-39-16-39-36s18-37 40-36c22 1 39 16 39 36s-17 37-40 36zM316 252c-1-16-14-29-30-29-17 0-31 12-31 28s14 29 30 29c17 0 31-12 31-28zM368 288c-1-20-16-36-35-36-20 0-36 15-36 34 0 20 16 36 35 36s36-15 36-34zM10 250c0-51 38-93 85-93s85 42 85 93c0 50-38 91-85 91s-85-41-85-91zM517 386c1-15 14-27 30-27s30 12 30 27-13 28-30 28-30-13-30-28zM551 433c-15-13-13-39 4-46 12-5 22 8 22 21 0 17-9 27-26 25zM613 429c-15-13-13-39 4-46 12-5 22 8 22 21 0 17-9 27-26 25zM731 433c-15-13-13-39 4-46 12-5 22 8 22 21 0 17-9 27-26 25zM796 394c-1-20-16-36-35-36-20 0-36 15-36 34 0 20 16 36 35 36s36-15 36-34zM754 325c-1-20-16-36-35-36-20 0-36 15-36 34 0 20 16 36 35 36s36-15 36-34zM805 322c-1-15-13-28-29-28-17 0-31 12-31 28 0 16 14 28 31 28s29-12 29-28zM874 250c0-51 38-93 85-93s85 42 85 93c0 50-38 91-85 91s-85-41-85-91zM624 32c-1-17-15-31-33-31-18 0-33 14-33 31s15 31 33 31 33-14 33-31zM443 1c-1-17-15-31-33-31-18 0-33 14-33 31s15 31 33 31 33-14 33-31zM281 32c-1-17-15-31-33-31-18 0-33 14-33 31s15 31 33 31 33-14 33-31zM420 250c0-83 62-151 140-151s140 68 140 151-62 151-140 151-140-68-140-151z"></path>
+            </svg>
+            
+            <!-- Animated Elements -->
+           
+        
+        <div id="gpsFinalMessage" class="final-message hidden">
+            <h4>সারা বিশ্বের সাথে সংযুক্ত</h4>
+            <p>আপনার গাড়ি, এখন আপনার হাতের মুঠোয়।<br><em>লাইভ ট্র্যাকিং এবং পূর্ণাঙ্গ নিরাপত্তা ফিচার শীঘ্রই আসছে।</em></p>
+            <button class="clear-btn" style="margin-top: 1rem;" onclick="window.app.backToDashboard()">⬅️ ড্যাশবোর্ডে ফিরে যান</button>
+        </div>
+    </section>
+    
     
     <!-- Entry Form for Installment Plan -->
     <div class="entry-form" id="installmentPlanForm" role="dialog" aria-modal="true">

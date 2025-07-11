@@ -750,3 +750,141 @@ body.dark .reminder-card:hover {
     font-size: 0.9rem;
 }
 
+
+
+/* --- GPS Live Signal Animation Styles --- */
+
+.gps-live-signal-page {
+    background: linear-gradient(to bottom, #87CEEB 80%, #696969 20%); /* Sky and Road */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 1rem;
+    overflow: hidden;
+    position: relative;
+}
+
+body.dark .gps-live-signal-page {
+    background: linear-gradient(to bottom, #0a192f 80%, #2d3748 20%);
+}
+
+.city-skyline {
+    position: absolute;
+    bottom: 20%; /* Road height */
+    left: 0;
+    width: 100%;
+    height: 150px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><path fill="%23B0C4DE" d="M0 20 L0 15 L5 15 L5 5 L10 5 L10 17 L15 17 L15 10 L20 10 L20 20 Z M25 20 L25 8 L30 8 L30 12 L35 12 L35 6 L40 6 L40 20 Z M45 20 L45 14 L50 14 L50 4 L55 4 L55 16 L60 16 L60 20 Z M65 20 L65 10 L70 10 L70 15 L75 15 L75 5 L80 5 L80 20 Z M85 20 L85 12 L90 12 L90 16 L95 16 L95 8 L100 8 L100 20 Z"/></svg>');
+    background-repeat: repeat-x;
+    opacity: 0.5;
+}
+body.dark .city-skyline {
+    opacity: 0.2;
+}
+
+
+.road {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 20%;
+    background-color: #696969;
+    border-top: 5px solid #4a4a4a;
+}
+body.dark .road {
+    background-color: #2d3748;
+    border-top-color: #1a202c;
+}
+
+.animation-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    height: 200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.tower-img, .car-img {
+    max-height: 80px;
+    width: auto;
+    animation: slide-in 1.5s forwards;
+}
+.tower-img { transform: translateX(-100vw); animation-delay: 0.2s; }
+.car-img { transform: translateX(100vw); animation-delay: 0.4s; }
+
+@keyframes slide-in {
+    to { transform: translateX(0); }
+}
+
+.signal-wave {
+    position: absolute;
+    top: -10px; /* Adjust based on car image */
+    right: 50px; /* Adjust based on car image */
+    width: 60px;
+    height: 60px;
+    opacity: 0;
+    animation: show-signal 0.5s forwards 1.5s;
+}
+
+@keyframes show-signal {
+    to { opacity: 1; }
+}
+
+.signal-wave span {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid #3b82f6;
+    opacity: 0;
+    transform: scale(0);
+    animation: wave 2s infinite;
+}
+.signal-wave span:nth-child(2) { animation-delay: 0.3s; }
+.signal-wave span:nth-child(3) { animation-delay: 0.6s; }
+
+@keyframes wave {
+    0% { transform: scale(0); opacity: 1; }
+    50% { opacity: 0.8; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+.gps-message-container {
+    text-align: center;
+    color: #fff;
+    margin-top: 2rem;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fade-in-up 1s forwards 2s;
+}
+body.dark .gps-message-container { color: #f0f0f0; }
+
+.gps-message-container h3 { font-size: 1.8rem; font-weight: 700; }
+.gps-message-container p { font-size: 1rem; opacity: 0.9; }
+
+@keyframes fade-in-up {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* rfat */
+
+.rifat-img{
+      position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid #3b82f6;
+  opacity: 1;
+  transform: scale(1);
+  /*animation: wave 2s infinite; */
+}
+
+
+
+/*new chat gpt*/

@@ -55,6 +55,10 @@ const auth = firebase.auth();
         // Close side menu and remove blur
         if (sideMenu) sideMenu.classList.remove('show');
         if (mainContent) mainContent.style.filter = 'none';
+                if (sectionName === 'gps') {
+            if (sideMenu) sideMenu.classList.remove('show');
+            if (mainContent) mainContent.style.filter = 'none';
+        }
     };
     
         // --- Auto Management ---
@@ -442,6 +446,12 @@ const auth = firebase.auth();
         showDashboard: () => { showSection('main'); updateTodaySummary(); },
         showMessages: () => { showSection('messages'); renderMessages(); },
         
+        //gps 
+                showGpsPage: () => {
+            showSection('gps');
+            
+        },
+                 
         
         showSettings: () => showSection('settings'),
         showAbout: () => showSection('about'),
@@ -876,6 +886,7 @@ const auth = firebase.auth();
             sections.about = document.getElementById('aboutSection');
                         sections.installment = document.getElementById('installmentSection');
             installmentPlanForm = document.getElementById('installmentPlanForm');
+            sections.gps = document.getElementById('gpsSection');
 
                          const userDocRef = db.collection('users').doc(user.uid);
             userDocRef.get().then(doc => {
