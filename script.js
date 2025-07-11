@@ -179,7 +179,9 @@ const auth = firebase.auth();
                     ${isCompleted 
                         ? `<p style="color: #4ade80; text-align:center; font-weight:bold;">🎉 অভিনন্দন! সব কিস্তি পরিশোধিত।</p>` 
                         : `<div class="card-actions">
-                               <button class="action-btn pay-btn" onclick="window.app.payInstallment('${plan.id}')" ${isCompleted ? 'disabled' : ''}>কিস্তি পরিশোধ করুন</button>
+ 
+ 
+                <button class="action-btn pay-btn" onclick="window.app.payInstallment('${plan.id}', event)" ${isCompleted ? 'disabled' : ''}>কিস্তি পরিশোধ করুন</button>
                                <button class="action-btn details-btn" onclick="window.app.showPaymentHistory('${plan.id}')">বিস্তারিত দেখুন</button>
                            </div>`
                     }
@@ -660,59 +662,69 @@ const auth = firebase.auth();
         },     
                 
                 
-                payInstallment: (planId) => {
-                    if (!currentUser) return;
-                    const plan = installmentPlans.find(p => p.id === planId);
-                    if (!plan) return;
-                    
-                    Swal.fire({
-                        title: 'কিস্তি পরিশোধ',
-                        text: `${plan.autoName}-এর জন্য ${plan.installmentAmount.toLocaleString('bn-BD')} টাকার কিস্তি পরিশোধ করতে চান? এটি আপনার মূল ব্যয়ের হিসাবেও যোগ হবে।`,
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'হ্যাঁ, পরিশোধ করুন',
-                        cancelButtonText: 'না'
-                    }).then(async (result) => {
+                    payInstallment: async (planId, event) => {
+            const payButton = event.target;
+            if (payButton.disabled) return;
+            
+            payButton.disabled = true;
+            payButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            if (!currentUser) {
+                payButton.disabled = false;
+                payButton.innerHTML = 'কিস্তি পরিশোধ করুন';
+                return;
+            }
+            const plan = installmentPlans.find(p => p.id === planId);
+            if (!plan) {
+                payButton.disabled = false;
+                payButton.innerHTML = 'কিস্তি পরিশোধ করুন';
+                return;
+            }
+            
+            try {
+                const result = await Swal.fire({
+                    title: 'কিস্তি পরিশোধ',
+                    text: `${plan.autoName}-এর জন্য ${plan.installmentAmount.toLocaleString('bn-BD')} টাকার কিস্তি পরিশোধ করতে চান?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'হ্যাঁ, পরিশোধ করুন',
+                    cancelButtonText: 'না'
+                });
+                
                 if (result.isConfirmed) {
-               
-                                   const paymentRecord = {
+                    payButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেসিং...';
+                    
+                    const paymentRecord = {
                         date: new Date().toISOString().slice(0, 10),
                         amount: plan.installmentAmount,
-                        // paidAt: firebase.firestore.FieldValue.serverTimestamp() // সাময়িকভাবে এটি বন্ধ করা হলো
-                        paidAt: new Date().toISOString() // এর পরিবর্তে ক্লায়েন্ট সাইডের সময় ব্যবহার করা হচ্ছে
+                        paidAt: new Date().toISOString()
                     };
-               
-                    try {
-                        // শুধু কিস্তির প্ল্যান ডকুমেন্টটিকেই আপডেট করা হচ্ছে
-                        await db.collection("installmentPlans").doc(planId).update({
-                            payments: firebase.firestore.FieldValue.arrayUnion(paymentRecord)
-                        });
-                        
-                        playSound('submit');
-                        // এখানে আমরা onSnapshot এর জন্য অপেক্ষা করব না। 
-                        // কারণ সফল আপডেটের পর লোকাল ডেটাও আপডেট করা দরকার।
-                        
-                        // লোকাল ডেটা ম্যানুয়ালি আপডেট করা
-                        const planIndex = installmentPlans.findIndex(p => p.id === planId);
-                        if (planIndex > -1) {
-                            if (!installmentPlans[planIndex].payments) {
-                                installmentPlans[planIndex].payments = [];
-                            }
-                            installmentPlans[planIndex].payments.push(paymentRecord);
-                        }
-                        
-                        // UI রি-রেন্ডার করা
-                        renderInstallmentPlans();
-                        
-                        Swal.fire('সফল!', 'কিস্তি সফলভাবে পরিশোধ করা হয়েছে।', 'success');
-                        
-                    } catch (error) {
-                        console.error("Payment Error:", error);
-                        Swal.fire('ব্যর্থ!', 'একটি সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error');
-                    }
+                    
+                    // Firestore ডকুমেন্ট আপডেট করা
+                    await db.collection("installmentPlans").doc(planId).update({
+                        payments: firebase.firestore.FieldValue.arrayUnion(paymentRecord)
+                    });
+                    
+                    // Firestore থেকে ডেটা আপডেট হওয়ার জন্য onSnapshot লিসেনারকে সময় দেওয়া
+                    // এবং UI আপডেট হওয়া পর্যন্ত অপেক্ষা করা।
+                    // যেহেতু onSnapshot কাজ করছে, আমাদের ম্যানুয়ালি কিছু করার দরকার নেই।
+                    // শুধু একটি ছোট ডিলে যোগ করা যেতে পারে UI-তে পরিবর্তনটি দেখার জন্য।
+                    
+                    playSound('submit');
+                    await Swal.fire('সফল!', 'কিস্তি সফলভাবে পরিশোধ করা হয়েছে।', 'success');
+                    
                 }
-            });
-                },
+            } catch (error) {
+                console.error("Payment Error:", error);
+                await Swal.fire('ব্যর্থ!', 'একটি সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'error');
+            } finally {
+                // সব কাজ শেষে বাটন আবার সক্রিয় করা
+                payButton.disabled = false;
+                payButton.innerHTML = 'কিস্তি পরিশোধ করুন';
+            }
+        },
+            
+            
                 showPaymentHistory: (planId) => {
                     const plan = installmentPlans.find(p => p.id === planId);
                     if (!plan || !plan.payments || plan.payments.length === 0) {
