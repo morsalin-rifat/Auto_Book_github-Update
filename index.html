@@ -27,6 +27,8 @@
             <li onclick="window.app.showInstallment()">💰 কিস্তি ম্যানেজমেন্ট</li>
            
             <li onclick="window.app.showMessages()">📩 মেসেজ</li>
+            
+             
             <li onclick="window.app.showSettings()">⚙️ সেটিংস</li>
             <li onclick="window.app.showAbout()">ℹ️ আমাদের সম্পর্কে</li>
             <li onclick="window.app.logoutUser()">🔑 লগআউট</li>
@@ -50,10 +52,17 @@
         <div class="cash-card" onclick="window.app.toggleCash()">
             <span id="cashLabel">••••••</span>
             <i class="fas fa-eye"></i>
+                    <!-- Installment Reminder Card -->
+        
         </div>
+        
+        <div id="installmentReminder" class="reminder-card hidden" onclick="window.app.showInstallment()">
+    <!-- জাভাস্ক্রিপ্ট থেকে কন্টেন্ট এখানে আসবে -->
+</div>
         <div class="summary-box" id="todaySummaryBox">
             <span class="close-summary" onclick="window.app.hideToday()">❌</span>
             <div id="todaySummary">লোড হচ্ছে...</div>
+            
         </div>
         <button class="new-entry-btn" onclick="window.app.showEntryForm()">+ নতুন এন্ট্রি</button>
         <div id="entries"></div>

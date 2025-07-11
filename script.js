@@ -122,6 +122,64 @@ const auth = firebase.auth();
     
     };
     
+         const updateInstallmentReminder = () => {
+        const reminderDiv = document.getElementById('installmentReminder');
+        if (!reminderDiv) return;
+        
+        let nextInstallment = null;
+        
+               installmentPlans.forEach(plan => {
+            const totalInstallments = Math.round(plan.totalDue / plan.installmentAmount);
+            const paidCount = plan.payments ? plan.payments.length : 0;
+            
+            if (paidCount >= totalInstallments) {
+                return; // প্ল্যান সম্পন্ন হলে এই লুপ থেকে বেরিয়ে যাওয়া হবে
+            }
+            
+            // --- সঠিক মাসিক তারিখ হিসাব করার নতুন লজিক ---
+            // প্রতিটি হিসাবের জন্য একটি নতুন 'Date' অবজেক্ট তৈরি করা হচ্ছে
+            const firstDate = new Date(plan.firstInstallmentDate + 'T00:00:00'); // সময় অঞ্চল সমস্যা এড়ানোর জন্য
+            
+            // পরবর্তী কিস্তির তারিখ হিসাব করা হচ্ছে প্রথম তারিখের সাথে পরিশোধিত মাস যোগ করে
+            const nextDate = new Date(firstDate.getFullYear(), firstDate.getMonth() + paidCount, firstDate.getDate());
+            
+            if (!nextInstallment || nextDate < nextInstallment.date) {
+                nextInstallment = {
+                    date: nextDate,
+                    plan: plan
+                };
+            }
+        });
+        
+        if (nextInstallment) {
+            const daysLeft = Math.ceil((nextInstallment.date - new Date()) / (1000 * 60 * 60 * 24));
+            let dayText = '';
+            if (daysLeft < 0) {
+                dayText = ' (সময় পার হয়েছে)';
+            } else if (daysLeft === 0) {
+                dayText = ' (আজ)';
+            } else if (daysLeft === 1) {
+                dayText = ' (আগামীকাল)';
+            } else {
+                dayText = ` (${daysLeft} দিন বাকি)`;
+            }
+            
+            reminderDiv.innerHTML = `
+                <div class="icon">💰</div>
+                <h5>পরবর্তী কিস্তি রিমাইন্ডার</h5>
+                <p>
+                    <strong>${nextInstallment.plan.autoName}</strong>-এর কিস্তি 
+                    ${nextInstallment.date.toLocaleDateString('bn-BD')} তারিখে 
+                    <strong>${nextInstallment.plan.installmentAmount.toLocaleString('bn-BD')} ৳</strong>
+                    ${dayText}
+                </p>
+            `;
+            reminderDiv.classList.remove('hidden');
+        } else {
+            reminderDiv.classList.add('hidden');
+        }
+    };
+    
 
          // --- Installment Management ---
     const renderInstallmentPlans = () => {
@@ -383,6 +441,8 @@ const auth = firebase.auth();
         hideToday: () => { if (todaySummary) todaySummary.parentElement.classList.add('hidden'); },
         showDashboard: () => { showSection('main'); updateTodaySummary(); },
         showMessages: () => { showSection('messages'); renderMessages(); },
+        
+        
         showSettings: () => showSection('settings'),
         showAbout: () => showSection('about'),
         backToDashboard: () => showSection('main'),
@@ -779,6 +839,7 @@ const auth = firebase.auth();
                 installmentPlans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderInstallmentPlans();
                 renderAutos(); // Re-render autos to update dropdowns
+                updateInstallmentReminder();
             }, error => console.error("Error fetching installment plans:", error));
     };
 
