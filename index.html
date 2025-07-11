@@ -171,7 +171,10 @@
         </select>
         <input type="number" id="totalPriceInput" placeholder="গাড়ির মোট মূল্য" aria-label="গাড়ির মোট মূল্য" />
         <input type="number" id="downPaymentInput" placeholder="ডাউন পেমেন্ট" aria-label="ডাউন পেমেন্ট" />
-        <input type="number" id="installmentAmountInput" placeholder="মাসিক কিস্তির পরিমাণ" aria-label="মাসিক কিস্তির পরিমাণ" />
+        
+                <input type="number" id="totalInstallmentsInput" placeholder="মোট কিস্তির সংখ্যা (e.g., 24)" aria-label="মোট কিস্তির সংখ্যা" />
+        <p id="calculatedAmount" class="calculated-amount-display"></p> <!-- স্বয়ংক্রিয় হিসাব দেখানোর জন্য -->
+        
         <label for="firstInstallmentDateInput" style="margin-top: 0.5rem; font-size: 0.9rem;">প্রথম কিস্তির তারিখ:</label>
         <input type="date" id="firstInstallmentDateInput" aria-label="প্রথম কিস্তির তারিখ" />
         

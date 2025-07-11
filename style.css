@@ -677,3 +677,24 @@ body.dark .progress-bar-container {
     background-color: #6b7280;
     color: white;
 }
+
+
+/* --- Calculated Amount Display Style --- */
+.calculated-amount-display {
+    text-align: center;
+    margin: 0.5rem 0;
+    padding: 0.6rem;
+    background-color: #e0f2fe; /* light blue */
+    border-left: 4px solid #0ea5e9; /* sky blue */
+    color: #0c4a6e; /* dark blue */
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 4px;
+    display: none; /* Initially hidden */
+}
+
+body.dark .calculated-amount-display {
+    background-color: #1e3a8a; /* dark blue bg */
+    border-left-color: #3b82f6; /* brighter blue */
+    color: #dbeafe; /* light blue text */
+}

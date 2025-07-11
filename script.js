@@ -19,6 +19,7 @@ const auth = firebase.auth();
     let messages = [];
     let autos = [];
     let installmentPlans = [];
+    let editingPlanId = null; // কোন প্ল্যানটি এডিট করা হচ্ছে তা ট্র্যাক করার জন্য
     let showCash = false;
     let darkMode = localStorage.getItem('darkMode') === 'true';
 
@@ -140,7 +141,7 @@ const auth = firebase.auth();
         }
         
         installmentPlans.forEach(plan => {
-            const totalInstallments = Math.ceil(plan.totalDue / plan.installmentAmount);
+             const totalInstallments = Math.round(plan.totalDue / plan.installmentAmount);
             const paidInstallments = plan.payments ? plan.payments.length : 0;
             const progress = (paidInstallments / totalInstallments) * 100;
             const isCompleted = paidInstallments >= totalInstallments;
@@ -156,6 +157,8 @@ const auth = firebase.auth();
                         <p>মোট কিস্তি: <span>${totalInstallments} টি</span></p>
                     </div>
                     <div class="card-actions">
+                    
+                    <button class="action-btn" style="background-color: #f59e0b;" onclick="window.app.editInstallmentPlan('${plan.id}')">এডিট করুন</button>
                         <button class="action-btn details-btn" style="background-color: #ef4444;" onclick="window.app.deleteInstallmentPlan('${plan.id}')">প্ল্যান মুছুন</button>
                     </div>
                 </div>
@@ -501,59 +504,117 @@ const auth = firebase.auth();
                 document.getElementById(tabName).style.display = "block";
                 event.currentTarget.className += " active";
             },
-            showInstallmentPlanForm: () => {
-                if (installmentPlanForm) {
-                    // Clear form fields before showing
-                    document.getElementById('installmentAutoSelect').value = '';
+             
+                     showInstallmentPlanForm: (isEditing = false) => {
+            if (installmentPlanForm) {
+                const formTitle = installmentPlanForm.querySelector('h3');
+                const autoSelect = document.getElementById('installmentAutoSelect');
+                
+                if (isEditing) {
+                    formTitle.textContent = 'প্ল্যান এডিট করুন';
+                    autoSelect.disabled = true; // গাড়ি পরিবর্তন করতে দেওয়া হবে না
+                } else {
+                    editingPlanId = null; // নতুন প্ল্যানের জন্য আইডি রিসেট করা
+                    formTitle.textContent = 'নতুন কিস্তির প্ল্যান';
+                    autoSelect.disabled = false;
+                    
+                    // Clear form fields for new entry
+                    autoSelect.value = '';
                     document.getElementById('totalPriceInput').value = '';
                     document.getElementById('downPaymentInput').value = '';
-                    document.getElementById('installmentAmountInput').value = '';
+                    document.getElementById('totalInstallmentsInput').value = '';
                     document.getElementById('firstInstallmentDateInput').valueAsDate = new Date();
                     
-                    installmentPlanForm.classList.add('show');
-                    mainContent.style.filter = 'blur(4px)';
-                    document.getElementById('installmentSection').style.filter = 'blur(4px)';
+                    const displayElement = document.getElementById('calculatedAmount');
+                    if (displayElement) displayElement.style.display = 'none';
                 }
-            },
-            hideInstallmentPlanForm: () => {
+                
+                installmentPlanForm.classList.add('show');
+                mainContent.style.filter = 'blur(4px)';
+                document.getElementById('installmentSection').style.filter = 'blur(4px)';
+            }
+        }, hideInstallmentPlanForm: () => {
                 if (installmentPlanForm) {
                     installmentPlanForm.classList.remove('show');
                     mainContent.style.filter = 'none';
                     document.getElementById('installmentSection').style.filter = 'none';
                 }
             },
-            saveInstallmentPlan: async () => {
-                    if (!currentUser) return;
-                    
-                    const plan = {
-                        autoName: document.getElementById('installmentAutoSelect').value,
-                        totalPrice: parseFloat(document.getElementById('totalPriceInput').value),
-                        downPayment: parseFloat(document.getElementById('downPaymentInput').value),
-                        installmentAmount: parseFloat(document.getElementById('installmentAmountInput').value),
-                        firstInstallmentDate: document.getElementById('firstInstallmentDateInput').value,
-                    };
-                    
-                    if (!plan.autoName || isNaN(plan.totalPrice) || isNaN(plan.downPayment) || isNaN(plan.installmentAmount) || !plan.firstInstallmentDate) {
-                        return Swal.fire({ icon: 'error', title: 'ফর্ম পূরণ করুন', text: 'অনুগ্রহ করে সব তথ্য সঠিকভাবে দিন।' });
-                    }
-                    
-                    const newPlan = {
-                        ...plan,
-                        userId: currentUser.uid,
-                        totalDue: plan.totalPrice - plan.downPayment,
-                        payments: [], // Array to store payment dates
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-                    
-                    try {
-                        await db.collection("installmentPlans").add(newPlan);
-                        Swal.fire({ icon: 'success', title: 'সফল', text: 'নতুন কিস্তির প্ল্যান সেভ হয়েছে।' });
-                        window.app.hideInstallmentPlanForm();
-                    } catch (error) {
-                        console.error("Error saving plan:", error);
-                        Swal.fire({ icon: 'error', title: 'ব্যর্থ', text: 'প্ল্যান সেভ করতে সমস্যা হয়েছে।' });
-                    }
-                },
+          
+          
+                    saveInstallmentPlan: async () => {
+            if (!currentUser) return;
+            
+            const planData = {
+                totalPrice: parseFloat(document.getElementById('totalPriceInput').value) || 0,
+                downPayment: parseFloat(document.getElementById('downPaymentInput').value) || 0,
+                totalInstallments: parseInt(document.getElementById('totalInstallmentsInput').value) || 0,
+                firstInstallmentDate: document.getElementById('firstInstallmentDateInput').value,
+            };
+            
+            if (planData.totalPrice <= 0 || planData.totalInstallments <= 0 || !planData.firstInstallmentDate) {
+                return Swal.fire({ icon: 'error', title: 'ফর্ম পূরণ করুন', text: 'অনুগ্রহ করে সব তথ্য সঠিকভাবে দিন।' });
+            }
+            const totalDue = planData.totalPrice - planData.downPayment;
+            if (totalDue < 0) {
+                return Swal.fire({ icon: 'error', title: 'ভুল তথ্য', text: 'ডাউন পেমেন্ট মোট মূল্যের চেয়ে বেশি হতে পারে না।' });
+            }
+            const installmentAmount = parseFloat((totalDue / planData.totalInstallments).toFixed(2));
+            
+            // যদি এডিট করা হয়
+            if (editingPlanId) {
+                const planToUpdate = installmentPlans.find(p => p.id === editingPlanId);
+                // যদি পেমেন্ট সংখ্যা নতুন কিস্তির সংখ্যার চেয়ে বেশি হয়ে যায়, তাহলে এডিট করতে বাধা দেওয়া
+                if (planToUpdate.payments && planToUpdate.payments.length > planData.totalInstallments) {
+                    return Swal.fire({ icon: 'error', title: 'এডিট সম্ভব নয়', text: `আপনি ইতিমধ্যে ${planToUpdate.payments.length} টি কিস্তি পরিশোধ করেছেন, তাই মোট কিস্তির সংখ্যা এর চেয়ে কম হতে পারে না।` });
+                }
+                
+                const updatedPlan = {
+                    totalPrice: planData.totalPrice,
+                    downPayment: planData.downPayment,
+                    firstInstallmentDate: planData.firstInstallmentDate,
+                    totalDue: totalDue,
+                    installmentAmount: installmentAmount,
+                };
+                
+                try {
+                    await db.collection("installmentPlans").doc(editingPlanId).update(updatedPlan);
+                    Swal.fire({ icon: 'success', title: 'সফল', text: 'প্ল্যানটি সফলভাবে আপডেট হয়েছে।' });
+                } catch (error) {
+                    console.error("Error updating plan:", error);
+                    Swal.fire({ icon: 'error', title: 'ব্যর্থ', text: 'প্ল্যান আপডেট করতে সমস্যা হয়েছে।' });
+                }
+                
+            } else { // যদি নতুন প্ল্যান তৈরি করা হয়
+                const autoName = document.getElementById('installmentAutoSelect').value;
+                if (!autoName) return Swal.fire({ icon: 'error', title: 'গাড়ি নির্বাচন করুন', text: 'একটি গাড়ি নির্বাচন করতে হবে।' });
+                
+                const newPlan = {
+                    autoName: autoName,
+                    ...planData,
+                    installmentAmount: installmentAmount,
+                    totalDue: totalDue,
+                    userId: currentUser.uid,
+                    payments: [],
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                delete newPlan.totalInstallments;
+                
+                try {
+                    await db.collection("installmentPlans").add(newPlan);
+                    Swal.fire({ icon: 'success', title: 'সফল', text: 'নতুন কিস্তির প্ল্যান সেভ হয়েছে।' });
+                } catch (error) {
+                    console.error("Error saving plan:", error);
+                    Swal.fire({ icon: 'error', title: 'ব্যর্থ', text: 'প্ল্যান সেভ করতে সমস্যা হয়েছে।' });
+                }
+            }
+            
+            window.app.hideInstallmentPlanForm();
+            editingPlanId = null; // রিসেট
+        },
+                
+                
+                
                 deleteInstallmentPlan: (planId) => {
                     Swal.fire({
                         title: 'আপনি কি নিশ্চিত?',
@@ -573,6 +634,32 @@ const auth = firebase.auth();
                         }
                     });
                 },
+                
+                   editInstallmentPlan: (planId) => {
+            editingPlanId = planId;
+            const plan = installmentPlans.find(p => p.id === planId);
+            if (!plan) return;
+            
+            // Load plan data into the form
+            document.getElementById('installmentAutoSelect').value = plan.autoName;
+            document.getElementById('totalPriceInput').value = plan.totalPrice;
+            document.getElementById('downPaymentInput').value = plan.downPayment;
+            document.getElementById('firstInstallmentDateInput').value = plan.firstInstallmentDate;
+            
+            // Calculate and set total installments
+            const totalInstallments = Math.round(plan.totalDue / plan.installmentAmount);
+            document.getElementById('totalInstallmentsInput').value = totalInstallments;
+            
+            // Show the form in editing mode
+            window.app.showInstallmentPlanForm(true);
+            
+            // Trigger calculation display manually
+            const calculateInstallment = document.getElementById('totalPriceInput')._calculate;
+            if (calculateInstallment) calculateInstallment();
+            
+        },     
+                
+                
                 payInstallment: (planId) => {
                     if (!currentUser) return;
                     const plan = installmentPlans.find(p => p.id === planId);
@@ -786,6 +873,40 @@ const auth = firebase.auth();
                     });
                 });
             }
+    
+    
+                // --- Auto-calculate installment amount ---
+            const calculateInstallment = () => {
+                const totalPrice = parseFloat(document.getElementById('totalPriceInput').value) || 0;
+                const downPayment = parseFloat(document.getElementById('downPaymentInput').value) || 0;
+                const totalInstallments = parseInt(document.getElementById('totalInstallmentsInput').value) || 0;
+                const displayElement = document.getElementById('calculatedAmount');
+                
+                if (totalPrice > 0 && totalInstallments > 0) {
+                    const totalDue = totalPrice - downPayment;
+                    if (totalDue >= 0) {
+                        const amount = totalDue / totalInstallments;
+                        displayElement.textContent = `প্রতি কিস্তির পরিমাণ হবে প্রায় ${amount.toLocaleString('bn-BD', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ৳`;
+                        displayElement.style.display = 'block';
+                    } else {
+                        displayElement.style.display = 'none';
+                    }
+                } else {
+                    displayElement.style.display = 'none';
+                }
+            };
+            
+            document.getElementById('totalPriceInput').addEventListener('input', calculateInstallment);
+            document.getElementById('downPaymentInput').addEventListener('input', calculateInstallment);
+                         // Attach the function to the element so we can call it manually
+            const totalPriceInput = document.getElementById('totalPriceInput');
+            const downPaymentInput = document.getElementById('downPaymentInput');
+            const totalInstallmentsInput = document.getElementById('totalInstallmentsInput');
+            
+            totalPriceInput.addEventListener('input', calculateInstallment);
+            totalPriceInput._calculate = calculateInstallment; // Attach for manual call
+            downPaymentInput.addEventListener('input', calculateInstallment);
+            totalInstallmentsInput.addEventListener('input', calculateInstallment);
     
     };
 
